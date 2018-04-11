@@ -6,8 +6,8 @@
 #
 # Support for Python 2.7 or Higher version and for SecureCRT higher than 7 Version
 #
-# The Eclipse Distribution License is available at
-#   http://www.eclipse.org/org/documents/edl-v10.php.
+# The code is available at
+#   https://github.com/cff874460349/IOT_AutoTest.git
 #
 # Function:
 #   1、Support LoRa\NB-IOT module or more
