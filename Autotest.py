@@ -17,6 +17,7 @@
 
 # This shows a simple example of waiting for a message to be published.
 
+
 import sys
 import os
 import time
