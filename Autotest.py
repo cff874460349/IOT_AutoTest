@@ -129,7 +129,7 @@ def execute_cmd(filePath):
 			#init every TestCase
 			step = 0
 			TestResult="PASS"
-			cmdresult = ""
+			cmdResult = ""
 			continue
 
 		#get SubCase No.
@@ -155,7 +155,7 @@ def execute_cmd(filePath):
 			create_ErrorLog(TestCase, SubCase, step, cmd)
 			TestResult="FAIL"
 			#crt.Dialog.MessageBox("%s: %s Fail !" %(TestCase, cmd))
-		cmdResult = cmdResult + cmd + "," + isSuccess + "\r\n" 
+		cmdResult = (cmdResult + "Step%d:" + cmd + "," + isSuccess + "\r\n")  %(step)
 	create_TestReport(TestCase, TestID, TestName, cmdResult, TestResult)
 	crt.Dialog.MessageBox("All TestCase Run Finish! \r\n Log:E:\AutoTestLog")
 	file.close()
