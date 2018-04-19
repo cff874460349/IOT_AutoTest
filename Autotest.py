@@ -41,7 +41,7 @@ writer.writerow(reportTitle)
 #reportFile.close()
 
 #等待所有执行结果
-def execute_and_result(cmd, waitResultList, sleep_time=6): 
+def execute_and_result(cmd, waitResultList, sleep_time): 
     waitAllResult = True   
     crt.Screen.Send(cmd + "\r\n")
     for waitResult in waitResultList:
@@ -51,7 +51,7 @@ def execute_and_result(cmd, waitResultList, sleep_time=6):
 
 
 #等待其中一个执行结果
-def execute_or_result(cmd, waitResultList, sleep_time=6):
+def execute_or_result(cmd, waitResultList, sleep_time):
 	crt.Screen.Send(cmd + "\r\n")
 	wait_result = crt.Screen.WaitForStrings(waitResultList, sleep_time)    
 	return wait_result
@@ -62,7 +62,7 @@ def create_ErrorLog(TestCase, SubCase, step, cmd):
 	#get current COM message to getScr
 	maxRows = crt.Screen.Rows
 	maxCols = crt.Screen.Columns
-	getScr = crt.Screen.Get2(-10, 1, maxRows, maxCols)
+	getScr = crt.Screen.Get2(-30, 1, maxRows, maxCols)
 	#get current system time
 	currTime = time.strftime('%Y%m%d_%H_%M_%S',time.localtime(time.time()))
 	#generate E:\AutoTestLog\TestCase_time.txt
@@ -78,16 +78,26 @@ def create_ErrorLog(TestCase, SubCase, step, cmd):
 
 
 def execute_get_result(cmd, result):
-	isSuccess = True
-	resultList = result.split('&')		
+	isSuccess = True	
+	#判断该命令是否特殊等待时长，默认等待结果7s
+	cmdTemp = cmd.split('@')
+	cmd = cmdTemp[0]
+	if len(cmdTemp) > 1:
+		sleep_time = int(cmdTemp[1])
+	else:
+		sleep_time = 7
+
+	result = result.strip()
+	#crt.Dialog.MessageBox("%s" %result)
+	resultList = result.split('&')
 	crt.Sleep(5000)		
 	if len(resultList) > 1:
 		#预期结果是有&(与)关系
-		isSuccess = execute_and_result(cmd, resultList)
+		isSuccess = execute_and_result(cmd, resultList, sleep_time)
 	else:
 		#预期结果是有or(或)关系
 		resultList = result.split('|')
-		isSuccess = execute_or_result(cmd, resultList)
+		isSuccess = execute_or_result(cmd, resultList, sleep_time)
 	if True == isSuccess:
 		return "PASS"
 	else:
@@ -115,28 +125,29 @@ def execute_cmd(filePath):
 	TestName=""
 	for line in lines:
 		line = line.strip()
-		#判断是否是空行或注释行  
+		#空行或注释行跳过不处理
 		if not len(line) or line.startswith('#'):
-			continue                            #是的话，跳过不处理  
+			continue
 		if line.startswith('TestCase'):
 			#create last TestCase result
 			create_TestReport(TestCase, TestID, TestName, cmdResult, TestResult)
 			lineStr = line.decode('gb2312').encode('utf-8')
 			#crt.Dialog.MessageBox("%s" %(lineStr))
 			[TestCase, TestID, TestName] = lineStr.split()
-			crt.Sleep(3000)
+			crt.Sleep(10000)
 			crt.Screen.Clear()
 			#init every TestCase
 			step = 0
 			TestResult="PASS"
 			cmdResult = ""
+			SubCase=""
 			continue
 
 		#get SubCase No.
 		if line.startswith('SubCase'):
 			SubCase = line
 			cmdResult = cmdResult + "\r\n\r\n" + SubCase + "\r\n"
-			crt.Sleep(3000)
+			crt.Sleep(5000)
 			crt.Screen.Clear()
 			step = 0
 			continue
@@ -147,7 +158,8 @@ def execute_cmd(filePath):
 			crt.Sleep(int(delayTime))
 			continue	
 
-		[cmd, result] = line.split()
+		[cmd, result] = line.split(' ', 1)
+		
 		step += 1		
 		isSuccess = execute_get_result(cmd, result)		
 		if isSuccess == "FAIL":
