@@ -178,14 +178,13 @@ def main():
 		if "" == filePath:
 			crt.Dialog.MessageBox("AutoTest Run Fail! No AutoScript To Run!")
 			raise
-		execute_cmd(filePath)
-		reportFile.close()
+		execute_cmd(filePath)		
 	except Exception as e:
-		reportFile.close()
+		raise
 	else:
 		pass
 	finally:
-		pass
+		reportFile.close()
 
 		
 main()
