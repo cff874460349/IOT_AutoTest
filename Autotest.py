@@ -24,20 +24,12 @@ import time
 import csv
 import codecs
 
+completeRate = 0.00
 
 
+#Set tab = crt.GetScriptTab
 #logPath =  crt.Dialog.FileOpenDialog("please open a Path","open")
-filePath = crt.Dialog.FileOpenDialog("Please select a TestCase file","Open",  filter = "Txt Files (*.txt)|*.txt") 
 
-currPath = 'E:\\AutoTestLog\\'
-
-currTime = time.strftime('%Y%m%d_%H_%M_%S',time.localtime(time.time()))
-reportPath = currPath + "TestReport_%s.csv" %(currTime)
-reportFile = open(reportPath, 'ab+')
-reportFile.write(codecs.BOM_UTF8)
-writer = csv.writer(reportFile)
-reportTitle = ['脚本编号', '测试用例编号', '测试用例名称', '测试步骤及结果', '测试结果']
-writer.writerow(reportTitle)
 #reportFile.close()
 
 #等待所有执行结果
@@ -67,9 +59,9 @@ def create_ErrorLog(TestCase, SubCase, step, cmd):
 	currTime = time.strftime('%Y%m%d_%H_%M_%S',time.localtime(time.time()))
 	#generate E:\AutoTestLog\TestCase_time.txt
 	if len(SubCase) > 0:
-		logPath = currPath + "%s_%s_Step%d_%s.txt" %(TestCase, SubCase, step, currTime)
+		logPath = currPath + "%s_%s_%s_Step%d_%s.txt" %(tabb.Caption, TestCase, SubCase, step, currTime)
 	else:
-		logPath = currPath + "%s_Step%d_%s.txt" %(TestCase, step, currTime)
+		logPath = currPath + "%s_%s_Step%d_%s.txt" %(tabb.Caption, TestCase, step, currTime)
 	#crt.Dialog.MessageBox("%s" %logPath)
 	logfile = open(logPath, 'a')
 	for line in getScr:
@@ -111,9 +103,19 @@ def create_TestReport(TestCase, TestID, TestName, cmdResult, TestResult):
 	writer.writerow(reportTitle)
 	return
 
+def  calculateCompleteRate(index, lens):
+	if  lens <= 0:
+		return 0
+	else:
+		return 1.00*index/lens
+
+def getCompleteRate():
+	global completeRate
+	return completeRate
 
 def execute_cmd(filePath):
 	#read 
+	global completeRate
 	file = open(filePath, "r")
 	lines = file.readlines()
 	step = 0
@@ -123,7 +125,11 @@ def execute_cmd(filePath):
 	cmdResult=""
 	TestID=""
 	TestName=""
+	lineNo = 1
+	lens = len(lines)
 	for line in lines:
+		completeRate = calculateCompleteRate(lineNo, lens)
+		lineNo += 1
 		line = line.strip()
 		#空行或注释行跳过不处理
 		if not len(line) or line.startswith('#'):
@@ -174,7 +180,34 @@ def execute_cmd(filePath):
 	
 
 def main():
-	try:
+	#global filePath
+	global currPath
+	global writer
+	global tabb
+	
+	#
+	#tab = crt.Session.Connect("/Serial COM11 /BAUD 115200")
+	#tab = crt.Session.Connect("%s" %(sys.argv[0]))
+	tabb = crt.GetScriptTab()
+	#crt.Dialog.MessageBox("%s" %(tabb.Caption))
+	#crt.Dialog.MessageBox("%s" %(sys.argv[4]))
+	#crt.Dialog.MessageBox("%s" %(os.getcwd()))
+
+	currPath = os.getcwd() + "\\%s\\" %(sys.argv[4])
+	#crt.Dialog.MessageBox("%s" %(currPath))
+	os.mkdir(currPath)
+	#currPath = sys.argv[1]
+	currTime = time.strftime('%Y%m%d_%H_%M_%S',time.localtime(time.time()))
+	reportPath = currPath + "TestReport_%s_%s.csv" %(tabb.Caption, currTime)
+	reportFile = open(reportPath, 'ab+')
+
+	try:		
+		reportFile.write(codecs.BOM_UTF8)
+		writer = csv.writer(reportFile)
+		reportTitle = ['脚本编号', '测试用例编号', '测试用例名称', '测试步骤及结果', '测试结果']
+		writer.writerow(reportTitle)		
+
+		filePath = crt.Dialog.FileOpenDialog("Please select a TestCase file","Open",  filter = "Txt Files (*.txt)|*.txt") 			
 		if "" == filePath:
 			crt.Dialog.MessageBox("AutoTest Run Fail! No AutoScript To Run!")
 			raise
@@ -185,6 +218,7 @@ def main():
 		pass
 	finally:
 		reportFile.close()
+		crt.Session.Disconnect()
 
 		
 main()
