@@ -193,9 +193,10 @@ def main():
 	#crt.Dialog.MessageBox("%s" %(sys.argv[4]))
 	#crt.Dialog.MessageBox("%s" %(os.getcwd()))
 
-	currPath = os.getcwd() + "\\%s\\" %(sys.argv[4])
+	currPath = os.getcwd() + "\\%s\\" %(tabb.Caption)
 	#crt.Dialog.MessageBox("%s" %(currPath))
-	os.mkdir(currPath)
+	if not os.path.exists(currPath):
+		os.mkdir(currPath)
 	#currPath = sys.argv[1]
 	currTime = time.strftime('%Y%m%d_%H_%M_%S',time.localtime(time.time()))
 	reportPath = currPath + "TestReport_%s_%s.csv" %(tabb.Caption, currTime)
