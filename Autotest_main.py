@@ -11,6 +11,7 @@ import FileDialog
 #import Autotest
 import sys
 import os
+import threading
 '''
     在python 3.3.2中，tkinter模块可以创建一个窗口控件，如Java中的Swing
     功能描述：
@@ -248,8 +249,13 @@ class addNewConnect(object):
       os.system(cmd)
       # button被点击之后会被执行
 
+  def newThread(self):
+    t = threading.Thread(target=self.startTest)
+    t.start()
+    pass
+
   def SelectTestCase(self):
-      action = ttk.Button(root, text="选择并执行", command=self.startTest)     # 创建一个按钮, text：显示按钮上面显示的文字, command：当这个按钮被点击之后会调用command函数
+      action = ttk.Button(root, text="选择并执行", command=self.newThread)     # 创建一个按钮, text：显示按钮上面显示的文字, command：当这个按钮被点击之后会调用command函数
       action.pack(side=TOP,pady = 0)
 
 
